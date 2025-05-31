@@ -5,7 +5,33 @@
     src: url('OpenSans-ExtraBold.ttf') format('truetype');
 }
 
-.card{
+.card-arquidiocese{
+    background-image: url("pastoral-logo-fofo-horizontal.png");
+    background-size: 100% 100%;
+    width: 250px;
+    height: 137.5px;
+    background-repeat: no-repeat;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: end;
+    margin-bottom: 20px;
+    margin-right: 20px;
+    text-align: center;
+}
+
+.textArea-arquidiocese{
+    font-style: italic;
+    font-family: "Montserrat";
+    font-weight: 650;
+    margin-bottom: 20px;
+    font-size: 9px;
+    color: #d36810;
+    z-index: 1;
+}
+
+.card-primary{
     background-image: url("template.png");
     background-size: 100% 100%;
     width: 480px;
@@ -18,10 +44,10 @@
     justify-content: center;
     margin: 20px;
     text-align: center;
-
 }
 
-.textArea{
+.textArea-primary{
+    text-transform: uppercase;
     font-family: "Open";
     margin: 5px;
     margin-top: 33px;

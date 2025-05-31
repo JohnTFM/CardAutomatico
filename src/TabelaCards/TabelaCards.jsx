@@ -1,139 +1,160 @@
 import Card from "../Card/Card";
-import { useState} from "react";
-import Input from "../Input/Input"
+import { useState } from "react";
+import Input from "../Input/Input";
+import "./TabelaCards.css";
 
-class TextoError extends Error {
-}
+class TextoError extends Error {}
 
-function TabelaCards(){
+function TabelaCards() {
+    const [touples, setTouples] = useState([['', '']]);
+    const [modoEntrada, setModoEntrada] = useState('arquivo');
+    const [textoLivre, setTextoLivre] = useState('');
+    const [backgroundImage, setBackgroundImage] = useState(null);
+    const [temaSelecionado, setTemaSelecionado] = useState("primary");
+    const [itensPorLinha, setItensPorLinha] = useState(2); // default
 
+    const temasDisponiveis = ["primary", "arquidiocese"];
 
-
-    console.log("Declaração 'touples'")
-    const [touples, setTouples] = useState([
-        ['','']
-    ])
+    const temaToClasses = (tema) => ({
+        cardClass: `card-${tema}`,
+        divtextAreaClass: `textArea-${tema}`,
+    });
 
     const handleArquivoChange = (event) => {
-        console.log("NÓ 1")
-        console.log("Declaração local 'arquivoSelecionado'");
         const arquivoSelecionado = event.target.files[0];
-
-        if (!arquivoSelecionado) {
-            console.log("NÓ 2 - Fim")
-            alert("Nenhum arquivo selecionado!");
-            return;
-        }
-
-        console.log("NÓ 3")
+        if (!arquivoSelecionado) return alert("Nenhum arquivo selecionado!");
 
         const extensao = arquivoSelecionado.name.split('.').pop().toLowerCase();
-        if (
-            (extensao!== arquivoSelecionado.name ) &&
-            extensao !== "txt")
-        {
-            console.log("NÓ 4 - Fim")
-            alert("Somente arquivos .txt são permitidos!" + extensao);
-            return;
-        }
-        console.log("NÓ 5")
-        console.log("Declaração local 'leitorArquivos'");
-        const leitorArquivos = new FileReader();
+        if ((extensao !== arquivoSelecionado.name) && extensao !== "txt")
+            return alert("Somente arquivos .txt são permitidos!");
 
-        leitorArquivos.onload = (e) => {
+        const leitor = new FileReader();
+        leitor.onload = (e) => {
             const conteudo = e.target.result;
+            const ilegiveis = conteudo.match(/[^\x20-\x7E\n\r\u00A0-\uFFFF]/g);
+            if (ilegiveis) return alert("O arquivo contém caracteres ilegíveis.");
 
-            const caracteresIlegiveis = conteudo.match(/[^\x20-\x7E\n\r\u00A0-\uFFFF]/g);
-            if (caracteresIlegiveis && caracteresIlegiveis.length > 0) {
-                console.log("NÓ 6 - Fim")
-                alert("O arquivo contém caracteres ilegíveis e não é reconhecido como um arquivo de texto.");
-                return;
-            }else{
-                console.log("NÓ 7")
-                setTouples(  [
-                    ['','']
-                ])
-            }
-
+            setTouples([['', '']]);
             textoParaTuplas(conteudo);
         };
-
-        leitorArquivos.onerror = (e) => {
-            console.error(e);
-            alert("Um erro desconhecido ocorreu!");
-        };
-
-        // Tenta ler o arquivo como texto
-        leitorArquivos.readAsText(arquivoSelecionado);
+        leitor.onerror = () => alert("Erro ao ler o arquivo!");
+        leitor.readAsText(arquivoSelecionado);
     };
 
+    const textoParaTuplas = (txtBruto) => {
+        let texto = txtBruto;
+        if (!texto) throw new TextoError("O texto está vazio!");
 
+        let palavras = texto.split('\n');
+        let pares = palavras
+            .map((_, i) => i % 2 === 0 ? [palavras[i], palavras[i + 1]] : null)
+            .filter(e => e != null);
 
-    function textoParaTuplas(txtBruto){
+        setTouples(pares);
+    };
 
-        console.log("Definição local da variável 'texto'")
-        let texto = txtBruto.toUpperCase();
-
-        if(!texto){
-            console.log("NÓ 8  - Fim")
-            throw new TextoError("O texto do arquivo se encontra vazio!")
+    const handleRenderTextoLivre = () => {
+        try {
+            textoParaTuplas(textoLivre);
+        } catch (e) {
+            alert(e.message);
         }
+    };
 
-        console.log("NÓ 9 - Fim")
+    const handleImagemChange = (e) => {
+        const arquivo = e.target.files[0];
+        if (!arquivo) return;
 
-        console.log("Declaração da variável local 'palavras'")
-        let palavras = texto.split('\n')
+        const url = URL.createObjectURL(arquivo);
+        setBackgroundImage(url);
+    };
 
-        console.log("Declaração da variável local 'pares'")
-        let pares = palavras.map(
+    const dividirEmLinhas = (array, tamanho) => {
+        const linhas = [];
+        for (let i = 0; i < array.length; i += tamanho) {
+            linhas.push(array.slice(i, i + tamanho));
+        }
+        return linhas;
+    };
 
-            (palavra,index)=>{
-
-                if(index%2!==0) return null;
-
-                return [palavras[index],palavras[index+1]];
-
-            }).filter( e=> e!=null);
-
-        console.log("Definição da variável global 'touples'")
-
-        setTouples(pares)
-
-    }
-
-
-    return(
+    return (
         <>
-            <Input type={"file"} onChange={handleArquivoChange}/>
-            <table>
-                <tbody>
-                    {
-                        touples.map((tupla,index)=>{
+            <div className="no-print" style={{ marginBottom: '1rem' }}>
+                <label>Modo de entrada:&nbsp;</label>
+                <select value={modoEntrada} onChange={(e) => setModoEntrada(e.target.value)}>
+                    <option value="arquivo">Arquivo</option>
+                    <option value="texto">Texto Livre</option>
+                </select>
+            </div>
 
-                           return (
-                               <tr key={tupla[0]?.toString()}>
-                                       <td >
-                                           { touples[index][0] ?
-                                               <Card  titulo={touples[index][0]}/>
-                                               :
-                                               <></>
-                                           }
-                                       </td>
-                                       <td>
-                                           { touples[index][1] ?
-                                               <Card  titulo={touples[index][1]}/>
-                                               :
-                                               <></>
-                                           }
-                                       </td>
-                               </tr>
-                           )
-                        })
-                    }
-                </tbody>
-            </table>
+            {modoEntrada === 'arquivo' ? (
+                <div className="no-print">
+                    <Input type="file" onChange={handleArquivoChange} />
+                </div>
+            ) : (
+                <div className="no-print" style={{ marginBottom: '1rem' }}>
+                    <textarea
+                        rows={10}
+                        cols={60}
+                        value={textoLivre}
+                        onChange={(e) => setTextoLivre(e.target.value)}
+                        placeholder="Cole o conteúdo aqui..."
+                    />
+                    <br />
+                    <button onClick={handleRenderTextoLivre}>Renderizar</button>
+                </div>
+            )}
+
+            <div className="no-print" style={{ marginBottom: '1rem' }}>
+                <label>Imagem de fundo dos Cards:&nbsp;</label>
+                <input type="file" accept="image/*" onChange={handleImagemChange} />
+            </div>
+
+            <div className="no-print" style={{ marginBottom: '1rem' }}>
+                <label>Tema visual:&nbsp;</label>
+                <select value={temaSelecionado} onChange={(e) => setTemaSelecionado(e.target.value)}>
+                    {temasDisponiveis.map((tema) => (
+                        <option key={tema} value={tema}>{tema}</option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="no-print" style={{ marginBottom: '1rem' }}>
+                <label>Itens por linha:&nbsp;</label>
+                <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={itensPorLinha}
+                    onChange={(e) => setItensPorLinha(parseInt(e.target.value))}
+                />
+            </div>
+
+            {/* Renderização dinâmica */}
+            {dividirEmLinhas(touples, itensPorLinha).map((linha, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    {linha.map((tupla, index) => (
+                        <div key={index} style={{ margin: '5px' }}>
+                            {tupla[0] && (
+                                <Card
+                                    titulo={tupla[0]}
+                                    backgroundImage={backgroundImage}
+                                    theme={temaToClasses(temaSelecionado)}
+                                />
+                            )}
+                            {tupla[1] && (
+                                <Card
+                                    titulo={tupla[1]}
+                                    backgroundImage={backgroundImage}
+                                    theme={temaToClasses(temaSelecionado)}
+                                />
+                            )}
+                        </div>
+                    ))}
+                </div>
+            ))}
         </>
-    )
+    );
 }
 
 export default TabelaCards;
