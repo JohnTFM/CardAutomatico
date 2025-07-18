@@ -131,28 +131,36 @@ function TabelaCards() {
             </div>
 
             {/* Renderização dinâmica */}
-            {dividirEmLinhas(touples, itensPorLinha).map((linha, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    {linha.map((tupla, index) => (
-                        <div key={index} style={{ margin: '5px' }}>
-                            {tupla[0] && (
-                                <Card
-                                    titulo={tupla[0]}
-                                    backgroundImage={backgroundImage}
-                                    theme={temaToClasses(temaSelecionado)}
-                                />
-                            )}
-                            {tupla[1] && (
-                                <Card
-                                    titulo={tupla[1]}
-                                    backgroundImage={backgroundImage}
-                                    theme={temaToClasses(temaSelecionado)}
-                                />
-                            )}
-                        </div>
-                    ))}
-                </div>
-            ))}
+            <table style={{ width: '210mm', borderCollapse: 'collapse', marginLeft: 0 }}>
+                <tbody>
+                {dividirEmLinhas(touples, itensPorLinha).map((linha, i) => (
+                    <tr key={i}>
+                        {linha.map((tupla, index) => (
+                            <td key={index} style={{ padding: '10px', verticalAlign: 'top' }}>
+                                {tupla[0] && (
+                                    <div style={{ marginBottom: '10px' }}>
+                                        <Card
+                                            titulo={tupla[0]}
+                                            backgroundImage={backgroundImage}
+                                            theme={temaToClasses(temaSelecionado)}
+                                        />
+                                    </div>
+                                )}
+                                {tupla[1] && (
+                                    <div>
+                                        <Card
+                                            titulo={tupla[1]}
+                                            backgroundImage={backgroundImage}
+                                            theme={temaToClasses(temaSelecionado)}
+                                        />
+                                    </div>
+                                )}
+                            </td>
+                        ))}
+                    </tr>
+                ))}
+                </tbody>
+            </table>
         </>
     );
 }
